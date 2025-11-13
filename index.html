@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encoder/Decoder & JSON Validator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material.min.css">
+	 <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 200vh; /* To ensure scrolling is needed */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .content {
+            width: 100%;
+            text-align: center;
+        }
+        .base64-image {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle Button -->
+        <div class="theme-toggle">
+            <button id="theme-toggle-btn" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="theme-icon"></i>
+                <span id="theme-text">Dark Mode</span>
+            </button>
+        </div>
+        
+        <h1>Base64 Encoder/Decoder & JSON Validator</h1>
+        <p class="privacy-quote">Your data stays with you — validate safely, locally, and privately</p>
+        
+        <div class="main-layout">
+            <!-- Left Column: Encoder/Decoder -->
+            <div class="left-column">
+                <!-- Base64 Encoding Section -->
+                <div class="section">
+                    <h2><i class="fas fa-lock"></i> Base64 Encode</h2>
+                    <textarea id="base64-encode-input" placeholder="Enter text to encode..."></textarea>
+                    <div class="buttons">
+                        <button onclick="encodeBase64()"><i class="fas fa-arrow-right"></i> Encode</button>
+                        <button onclick="clearBase64EncodeFields()"><i class="fas fa-times"></i> Clear</button>
+                    </div>
+                    <textarea id="base64-encode-output" placeholder="Encoded output..." readonly></textarea>
+                </div>
+
+                <!-- Base64 Decoding Section -->
+                <div class="section">
+                    <h2><i class="fas fa-unlock"></i> Base64 Decode</h2>
+                    <textarea id="base64-decode-input" placeholder="Enter Base64 to decode..."></textarea>
+                    <div class="buttons">
+                        <button onclick="decodeBase64()"><i class="fas fa-arrow-right"></i> Decode</button>
+                        <button onclick="clearBase64DecodeFields()"><i class="fas fa-times"></i> Clear</button>
+                    </div>
+                    <textarea id="base64-decode-output" placeholder="Decoded output..." readonly></textarea>
+                </div>
+            </div>
+
+            <!-- Right Column: JSON Validator & URL Decoder -->
+            <div class="right-column">
+                <!-- JSON Validator Section -->
+                <div class="section">
+                    <h2><i class="fas fa-code"></i> JSON Validator</h2>
+                    <div class="json-editor-container">
+                        <textarea id="json-editor" placeholder='Enter your JSON here...'></textarea>
+                    </div>
+                    <div class="buttons">
+                        <button onclick="validateJSON()"><i class="fas fa-check-circle"></i> Validate</button>
+                        <button onclick="formatJSON()"><i class="fas fa-indent"></i> Format</button>
+                        <button onclick="compressJSON()"><i class="fas fa-compress"></i> Compress</button>
+                        <button onclick="clearJSONEditor()"><i class="fas fa-times"></i> Clear</button>
+                    </div>
+                    <div id="json-result" class="json-result"></div>
+                    <textarea id="json-output" placeholder="Processed JSON output..." readonly style="display: none;"></textarea>
+                </div>
+
+                <!-- URL Decoding Section -->
+                <div class="section">
+                    <h2><i class="fas fa-link"></i> URL Decode</h2>
+                    <textarea id="url-decode-input" placeholder="Enter URL to decode..."></textarea>
+                    <div class="buttons">
+                        <button onclick="decodeURL()"><i class="fas fa-arrow-right"></i> Decode</button>
+                        <button onclick="clearURLDecodeFields()"><i class="fas fa-times"></i> Clear</button>
+                    </div>
+                    <textarea id="url-decode-output" placeholder="Decoded output..." readonly></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Feedback Section -->
+        <div class="feedback-section">
+            <div class="feedback-header">
+                <i class="fas fa-heart"></i>
+                <span>Love this tool? Have suggestions?</span>
+            </div>
+            <div class="feedback-actions">
+                <button class="feedback-btn" onclick="openFeedback('email')">
+                    <i class="fas fa-envelope"></i>
+                    <span>Send Email</span>
+                </button>
+                <button class="feedback-btn" onclick="openFeedback('linkedin')">
+                    <i class="fab fa-linkedin"></i>
+                    <span>LinkedIn</span>
+                </button>
+                <button class="feedback-btn" onclick="openGitHub()">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </button>
+                <button class="feedback-btn" onclick="showAppreciationModal()">
+                    <i class="fas fa-star"></i>
+                    <span>Rate Tool</span>
+                </button>
+            </div>
+            <div class="developer-credit">
+                <span>🚀 Crafted by <strong>Sandeep Gupta</strong></span>
+            </div>
+        </div>
+
+        <!-- Appreciation Modal -->
+        <div id="appreciation-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h3>⭐ Rate This Tool</h3>
+                <p>How would you rate your experience?</p>
+                <div class="star-rating">
+                    <span class="star" data-rating="1">⭐</span>
+                    <span class="star" data-rating="2">⭐</span>
+                    <span class="star" data-rating="3">⭐</span>
+                    <span class="star" data-rating="4">⭐</span>
+                    <span class="star" data-rating="5">⭐</span>
+                </div>
+                <div id="rating-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CodeMirror JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
