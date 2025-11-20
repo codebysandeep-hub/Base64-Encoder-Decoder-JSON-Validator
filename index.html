@@ -53,7 +53,12 @@
                         <button onclick="encodeBase64()"><i class="fas fa-arrow-right"></i> Encode</button>
                         <button onclick="clearBase64EncodeFields()"><i class="fas fa-times"></i> Clear</button>
                     </div>
-                    <textarea id="base64-encode-output" placeholder="Encoded output..." readonly></textarea>
+                    <div class="output-container">
+                        <textarea id="base64-encode-output" placeholder="Encoded output..." readonly></textarea>
+                        <button class="copy-btn" onclick="copyToClipboard('base64-encode-output', this)" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Base64 Decoding Section -->
@@ -64,7 +69,12 @@
                         <button onclick="decodeBase64()"><i class="fas fa-arrow-right"></i> Decode</button>
                         <button onclick="clearBase64DecodeFields()"><i class="fas fa-times"></i> Clear</button>
                     </div>
-                    <textarea id="base64-decode-output" placeholder="Decoded output..." readonly></textarea>
+                    <div class="output-container">
+                        <textarea id="base64-decode-output" placeholder="Decoded output..." readonly></textarea>
+                        <button class="copy-btn" onclick="copyToClipboard('base64-decode-output', this)" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -83,7 +93,12 @@
                         <button onclick="clearJSONEditor()"><i class="fas fa-times"></i> Clear</button>
                     </div>
                     <div id="json-result" class="json-result"></div>
-                    <textarea id="json-output" placeholder="Processed JSON output..." readonly style="display: none;"></textarea>
+                    <div class="output-container">
+                        <textarea id="json-output" placeholder="Processed JSON output..." readonly style="display: none;"></textarea>
+                        <button class="copy-btn json-copy-btn" onclick="copyToClipboard('json-output', this)" title="Copy to clipboard" style="display: none;">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- URL Decoding Section -->
@@ -94,7 +109,12 @@
                         <button onclick="decodeURL()"><i class="fas fa-arrow-right"></i> Decode</button>
                         <button onclick="clearURLDecodeFields()"><i class="fas fa-times"></i> Clear</button>
                     </div>
-                    <textarea id="url-decode-output" placeholder="Decoded output..." readonly></textarea>
+                    <div class="output-container">
+                        <textarea id="url-decode-output" placeholder="Decoded output..." readonly></textarea>
+                        <button class="copy-btn" onclick="copyToClipboard('url-decode-output', this)" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

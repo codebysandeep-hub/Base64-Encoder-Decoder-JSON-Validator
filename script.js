@@ -57,6 +57,131 @@ function clearURLDecodeFields() {
     document.getElementById('url-decode-output').value = '';
 }
 
+// Copy to clipboard functionality
+function copyToClipboard(elementId, buttonElement) {
+    const element = document.getElementById(elementId);
+    let textToCopy = '';
+    
+    // Get the text to copy
+    if (elementId === 'json-output') {
+        // For JSON output, check if it's visible and has content
+        if (element.style.display === 'none' || !element.value.trim()) {
+            showCopyFeedback(buttonElement, 'No content to copy', false);
+            return;
+        }
+        textToCopy = element.value;
+    } else {
+        // For other textarea elements
+        if (!element.value.trim()) {
+            showCopyFeedback(buttonElement, 'No content to copy', false);
+            return;
+        }
+        textToCopy = element.value;
+    }
+    
+    // Modern clipboard API with fallback
+    if (navigator.clipboard && window.isSecureContext) {
+        // Modern async clipboard API
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showCopyFeedback(buttonElement, 'Copied!', true);
+        }).catch(err => {
+            // Fallback to older method
+            fallbackCopyTextToClipboard(textToCopy, buttonElement);
+        });
+    } else {
+        // Fallback for older browsers or non-secure contexts
+        fallbackCopyTextToClipboard(textToCopy, buttonElement);
+    }
+}
+
+// Fallback copy method for older browsers
+function fallbackCopyTextToClipboard(text, buttonElement) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopyFeedback(buttonElement, 'Copied!', true);
+        } else {
+            showCopyFeedback(buttonElement, 'Copy failed', false);
+        }
+    } catch (err) {
+        showCopyFeedback(buttonElement, 'Copy failed', false);
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// Show visual feedback for copy action
+function showCopyFeedback(buttonElement, message, success) {
+    const originalHTML = buttonElement.innerHTML;
+    const originalClass = buttonElement.className;
+    
+    // Update button appearance
+    if (success) {
+        buttonElement.className += ' copied';
+        buttonElement.innerHTML = '<i class="fas fa-check"></i>';
+    } else {
+        buttonElement.innerHTML = '<i class="fas fa-exclamation"></i>';
+        buttonElement.style.background = '#ef4444';
+    }
+    
+    // Create and show tooltip
+    const tooltip = document.createElement('div');
+    tooltip.textContent = success ? 'Copied!' : 'Nothing to copy';
+    tooltip.className = 'copy-tooltip';
+    
+    // Position tooltip above the button
+    const rect = buttonElement.getBoundingClientRect();
+    tooltip.style.cssText = `
+        position: fixed;
+        top: ${rect.top - 40}px;
+        left: ${rect.left + (rect.width / 2)}px;
+        transform: translateX(-50%);
+        background: ${success ? '#10b981' : '#ef4444'};
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        z-index: 9999;
+        opacity: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+    `;
+    
+    document.body.appendChild(tooltip);
+    
+    // Animate tooltip in
+    setTimeout(() => {
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateX(-50%) translateY(-5px)';
+    }, 10);
+    
+    // Reset after delay
+    setTimeout(() => {
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateX(-50%) translateY(5px)';
+        setTimeout(() => {
+            buttonElement.innerHTML = originalHTML;
+            buttonElement.className = originalClass;
+            buttonElement.style.background = '';
+            if (document.body.contains(tooltip)) {
+                document.body.removeChild(tooltip);
+            }
+        }, 300);
+    }, 1500);
+}
+
 // JSON Buddy Functionality
 let jsonEditor;
 
@@ -151,7 +276,7 @@ function validateJSON() {
     try {
         // Use native JSON.parse for validation
         const parsed = JSON.parse(jsonText);
-        showResult('✅ Your JSON is valid!', 'success');
+        showResult('Your JSON is valid!', 'success');
         
         // Don't display the formatted JSON for validation
         // Just show success message
@@ -194,7 +319,7 @@ function formatJSON() {
         // Update the editor with formatted JSON
         jsonEditor.setValue(formatted);
         
-        showResult('✅ JSON formatted successfully!', 'success');
+        showResult('JSON formatted successfully!', 'success');
         outputTextarea.style.display = 'none';
         
     } catch (error) {
@@ -220,10 +345,12 @@ function compressJSON() {
     const jsonText = jsonEditor.getValue().trim();
     const resultDiv = document.getElementById('json-result');
     const outputTextarea = document.getElementById('json-output');
+    const copyBtn = document.querySelector('.json-copy-btn');
     
     if (!jsonText) {
         showResult('Please enter some JSON to compress.', 'info');
         outputTextarea.style.display = 'none';
+        copyBtn.style.display = 'none';
         return;
     }
     
@@ -234,12 +361,13 @@ function compressJSON() {
         
         outputTextarea.value = compressed;
         outputTextarea.style.display = 'block';
+        copyBtn.style.display = 'block';
         
         const originalSize = jsonText.length;
         const compressedSize = compressed.length;
         const savings = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
         
-        showResult(`✅ JSON compressed successfully! Size reduced by ${savings}% (${originalSize} → ${compressedSize} characters)`, 'success');
+        showResult(`JSON compressed successfully! Size reduced by ${savings}% (${originalSize} → ${compressedSize} characters)`, 'success');
         
     } catch (error) {
         let errorMessage = '❌ Cannot compress invalid JSON: ' + error.message;
@@ -256,6 +384,7 @@ function compressJSON() {
         
         showResult(errorMessage, 'error');
         outputTextarea.style.display = 'none';
+        copyBtn.style.display = 'none';
     }
 }
 
@@ -264,11 +393,13 @@ function clearJSONEditor() {
     jsonEditor.setValue('');
     const resultDiv = document.getElementById('json-result');
     const outputTextarea = document.getElementById('json-output');
+    const copyBtn = document.querySelector('.json-copy-btn');
     
     resultDiv.style.display = 'none';
     resultDiv.className = 'json-result';
     outputTextarea.style.display = 'none';
     outputTextarea.value = '';
+    copyBtn.style.display = 'none';
 }
 
 // Helper function to show results
